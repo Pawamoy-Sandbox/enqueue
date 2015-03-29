@@ -1,0 +1,7 @@
+#!/bin/bash
+
+for i in $(ipcs | grep "$1" | cut -d' ' -f2)
+do
+	echo "ipcrm -m $i"
+	ipcrm -m $i
+done

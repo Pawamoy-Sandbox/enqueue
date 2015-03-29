@@ -1,0 +1,84 @@
+#!/bin/bash
+
+dirname="${0%/*}/enqueue"
+
+syntax="[HELP(-h) | DEBUG(-d) | RELEASE(-r) | BUILD(-b) | INSTALL(-i) | GDB(-g) | CLEAN(-c) | SET(-s)]"
+if [ -z "$1" ]; then
+	# comportement par défaut, à modifier selon préférences
+	# récupération de l'exécutable et écriture des fichiers de config
+	$0 SET
+	# déplacement de l'exécutable dans le path
+	mv enq $path/enqueue
+	# nettoyage des dossiers
+	$0 CLEAN
+else
+	rel=0; deb=0; bui=0; ins=0; gdb=0; cle=0; set=0
+	case "$1" in
+		RELEASE|-r) rel=1;;
+		DEBUG|-d) deb=1;;
+		BUILD|-b) bui=1;;
+		INSTALL|-i) ins=1;;
+		GDB|-g) gdb=1;;
+		CLEAN|-c) cle=1;;
+		SET|-s) set=1;;
+		HELP|-h)
+			echo -e "\033[1;33musage : $(basename $0) $syntax\033[0m"
+			echo "DEBUG et RELEASE compile le programme et le place dans le package."
+			echo "BUILD construit le .deb, et INSTALL l'installe via dpkg."
+			echo "SET permet d'installer les fichiers de config d'enqueue,"
+			echo "et de récupérer l'exécutable dans le dossier courant."
+			echo "GDB lance le programme via gdb, et enfin CLEAN nettoie le dossier"
+			echo "contenant ce script (${0%/*})"
+			echo "des fichiers extraits de l'archive ainsi que de l'exécutable"
+			echo "et du package .deb s'ils sont présent. CLEAN n'efface rien"
+			echo "si l'archive enqueue.tar.gz est introuvable dans ce même dossier."
+			exit 0
+		;;
+		*) echo -e "\033[1;33musage : $(basename $0) $syntax\033[0m" ;
+			exit 1
+		;;
+	esac
+	
+	if [ -f "$dirname.tar.gz" -a ! -d "$dirname" -a $cle -ne 1 ]; then
+		echo "Extraction de l'archive"
+		tar -C "${0%/*}" -xf "$dirname.tar.gz" >/dev/null
+	else
+		if [ ! -d "$dirname" -a $cle -ne 1 ]; then
+			echo "enqueue.tar.gz not found in ${dirname%/*}"
+			exit
+		fi
+	fi
+
+	if [ $rel -eq 1 ] ; then
+		echo "Compilation en mode RELEASE"
+		gcc -Wall -o $dirname/usr/bin/enqueue $dirname/usr/src/{enqueue.c,queue.c,squeue.c}
+	elif [ $deb -eq 1 ] ; then
+		echo "Compilation en mode DEBUG"
+		gcc -Wall -g -o $dirname/usr/bin/enqueue $dirname/usr/src/{enqueue.c,queue.c,squeue.c}
+	elif [ $bui -eq 1 ] ; then
+		echo "Empaquetage du programme"
+		sudo dpkg-deb --build $dirname
+		#~ mv $dirname/packaging.deb $dirname/enqueue.deb
+	elif [ $ins -eq 1 ] ; then
+		echo "Installation de enqueue.deb"
+		sudo dpkg -i $dirname.deb
+	elif [ $gdb -eq 1 ] ; then
+		echo "Lancement du programme via gdb"
+		gdb -q $dirname/usr/bin/enqueue
+	elif [ $cle -eq 1 ] ; then
+		if [ -f "$dirname.tar.gz" ]; then
+			echo "Nettoyage des dosiers"
+			test -d "$dirname"  && rm -rf "$dirname"
+			test -f "$dirname.deb" && rm "$dirname.deb"
+			test -f "${dirname%/*}/enq" && rm "${dirname%/*}/enq"
+		else
+			echo "enqueue.tar.gz not found, you should not delete these"
+		fi
+	elif [ $set -eq 1 ]; then
+		echo "Récupération de l'exécutable"
+		cp $dirname/usr/bin/enqueue ./enq
+		echo "Ecriture des fichiers de configuration"
+		mkdir -p $HOME/.enqueue/tasks
+		echo -e "DEFAULT_TASK=default\nMAX_RUNNING=4\nINIT_QUEUE_SIZE=64" > $HOME/.enqueue/config.ini
+	fi
+fi

@@ -1,0 +1,15 @@
+#!/bin/bash -e
+
+mkdir ~/.enqueue
+mkdir ~/.enqueue/tasks
+mkdir ~/.enqueue/static_tasks
+touch ~/.enqueue/config.ini
+
+usr=$(echo ~ | cut -d'/' -f3)
+
+chown $usr -R ~/.enqueue
+
+echo "DEFAULT_EDITOR=vim" > ~/.enqueue/config.ini
+echo "DEFAULT_TASK=default" >> ~/.enqueue/config.ini
+echo "FORCE_LOAD=0" >> ~/.enqueue/config.ini
+echo "MAX_RUNNING=8" >> ~/.enqueue/config.ini

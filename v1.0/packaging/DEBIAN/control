@@ -1,0 +1,8 @@
+Package: enqueue
+Version: 1.0
+Section: base
+Priority: optional
+Architecture: all
+Depends: bash
+Maintainer: Timothee Mazzucotelli <timothee.mazzucotelli@gmail.com>
+Description: Enqueue bash commands in waiting list for later execution

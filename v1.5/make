@@ -1,0 +1,31 @@
+#!/bin/bash
+
+if [ -z "$1" -o "$1" == "REALEASE" -o "$1" == "r" ] ; then
+	echo "Compilation en mode RELEASE"
+	gcc -Wall -o enq source/enqueue.c source/queue.c source/squeue.c
+	echo "Copie de l'exécutable dans le paquet"
+	cp enq packaging/usr/bin/enqueue
+elif [ "$1" == "DEBUG" -o "$1" == "d" ] ; then
+	echo "Compilation en mode DEBUG"
+	gcc -Wall -g -o enq source/enqueue.c source/queue.c source/squeue.c
+	echo "Copie de l'exécutable dans le paquet"
+	cp enq packaging/usr/bin/enqueue
+elif [ "$1" == "BUILD" -o "$1" == "b" ] ; then
+	echo "Empaquetage du programme"
+	sudo dpkg-deb --build packaging
+	mv packaging.deb enqueue.deb
+elif [ "$1" == "INSTALL" -o "$1" == "i" ] ; then
+	echo "Installation de enqueue.deb"
+	sudo dpkg -i enqueue.deb
+elif [ "$1" == "KILLICPS" -o "$1" == "k" ] ; then
+	echo "Destruction des segments de mémoire partagée inutilisés"
+	for i in $(ipcs | grep "$2" | cut -d' ' -f2)
+	do
+		#~ echo "ipcrm -m $i"
+		ipcrm -m $i
+	done
+elif [ "$1" == "GDB" -o "$1" == "g" ] ; then
+	echo "Lancement du programme via gdb"
+	gdb -q ./enq
+else $_fun_color $_color__usage "usage : $(basename $0) [DEBUG(-d) | RELEASE(-r) | BUILD(-b) | INSTALL(-i) | KILLICPS(-k) | GDB(-g)]"
+fi

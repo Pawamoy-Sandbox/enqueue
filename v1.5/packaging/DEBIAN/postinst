@@ -1,0 +1,13 @@
+#!/bin/bash -e
+
+mkdir ~/.enqueue
+mkdir ~/.enqueue/tasks
+touch ~/.enqueue/config.ini
+
+usr=$(echo ~ | cut -d'/' -f3)
+
+chown $usr -R ~/.enqueue
+
+echo "DEFAULT_TASK=default" > ~/.enqueue/config.ini
+echo "MAX_RUNNING=8" >> ~/.enqueue/config.ini
+echo "INIT_QUEUE_SIZE=64" >> ~/.enqueue/config.ini

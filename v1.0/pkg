@@ -1,0 +1,4 @@
+#!/bin/bash
+
+sudo dpkg-deb --build packaging
+mv packaging.deb enqueue.deb

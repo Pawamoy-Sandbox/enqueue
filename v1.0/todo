@@ -1,0 +1,13 @@
+ajouter à partir d'un fichier
+exécuter à partir d'un fichier
+
+gestion des taches fixes (ne se vident pas)
+
+option --set param value
+
+
+REMANIER LA FORMULE :
+	utiliser une structure shared composée seulement d'indicateurs sur les taches en cours
+		demande de modification, d'actualisation, démarrage, arrêt, ...
+	utiliser des files dynamiques de tableaux de chaines dynamiques tous les deux (optimisation mémoire et donc capacité)
+	agrémenté d'un identifiant correspondant à celui dans la structure partagée

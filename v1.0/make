@@ -1,0 +1,6 @@
+#!/bin/bash
+if [ "$1" == "DEBUG" ] ; then
+	DEBUG=-g
+fi
+gcc -Wall $DEBUG -o enq source/enqueue.c source/queue.c source/squeue.c
+cp enq packaging/usr/bin/enqueue
